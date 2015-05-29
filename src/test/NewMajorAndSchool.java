@@ -110,7 +110,7 @@ public class NewMajorAndSchool {
 				}
 				sql = "insert into tMajorGeneralToP values(0," + majorID
 						+ ",0,'" + majorName + "',\"" + provinceID + "\");";
-				// System.out.println(sql);
+//				 System.out.println(sql);
 				stmt.executeUpdate(sql);
 			} else {
 				majorID = rs.getInt(2);
