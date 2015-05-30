@@ -49,53 +49,6 @@ public class GenerateRecord {
 				opc0 = c20130;
 				opc1 = c20131;
 			}
-			if (type == 1) {
-				if (score >= 650 && score < 700) {
-					safeDown = -15;
-					safeUp = 5;
-					normalDown = -25;
-					normalUp = 10;
-					riskDown = -40;
-					riskUp = 15;
-				} else if (score >= 700) {
-					safeDown = -20;
-					safeUp = 5;
-					normalDown = -30;
-					normalUp = 10;
-					riskDown = -50;
-					riskUp = 15;
-				} else {
-					safeDown = -3;
-					safeUp = 5;
-					normalDown = -5;
-					normalUp = 10;
-					riskDown = -10;
-					riskUp = 15;
-				}
-			} else {
-				if (score >= 650 && score < 700) {
-					safeDown = -25;
-					safeUp = 15;
-					normalDown = -40;
-					normalUp = 20;
-					riskDown = -60;
-					riskUp = 25;
-				} else if (score >= 700) {
-					safeDown = -40;
-					safeUp = 15;
-					normalDown = -60;
-					normalUp = 20;
-					riskDown = -80;
-					riskUp = 25;
-				} else {
-					safeDown = -10;
-					safeUp = 10;
-					normalDown = -15;
-					normalUp = 20;
-					riskDown = -20;
-					riskUp = 25;
-				}
-			}
 			ResultSet rs;
 			Statement stmt;
 			int ranktop, rankbottom;
@@ -124,6 +77,7 @@ public class GenerateRecord {
 				// System.out.println(sql);
 				rs = stmt.executeQuery(sql);
 				rs.next();
+				System.out.println("score: "+score);
 				ranktop = rs.getInt("ranktop");
 				rankbottom = rs.getInt("rankbottom");
 				if (type == 0) {
@@ -152,6 +106,53 @@ public class GenerateRecord {
 				bottom = rs.getDouble("score");
 				System.out.println("bottom score:" + bottom);
 
+				if (type == 1) {
+					if (top >= 650 && top < 700) {
+						safeDown = -10;
+						safeUp = 10;
+						normalDown = -15;
+						normalUp = 10;
+						riskDown = -20;
+						riskUp = 15;
+					} else if (top >= 700) {
+						safeDown = -20;
+						safeUp = 20;
+						normalDown = -30;
+						normalUp = 30;
+						riskDown = -40;
+						riskUp = 40;
+					} else {
+						safeDown = -5;
+						safeUp = 5;
+						normalDown = -10;
+						normalUp = 10;
+						riskDown = -15;
+						riskUp = 15;
+					}
+				} else {
+					if (top >= 650 && top < 700) {
+						safeDown = -25;
+						safeUp = 15;
+						normalDown = -40;
+						normalUp = 20;
+						riskDown = -60;
+						riskUp = 25;
+					} else if (top >= 700) {
+						safeDown = -30;
+						safeUp = 30;
+						normalDown = -40;
+						normalUp = 40;
+						riskDown = -60;
+						riskUp = 60;
+					} else {
+						safeDown = -10;
+						safeUp = 10;
+						normalDown = -15;
+						normalUp = 15;
+						riskDown = -25;
+						riskUp = 25;
+					}
+				}
 				switch (risk) {
 				case 0:
 					sql = "insert into trecord(year,risk,score,type,schoolid,departmentid,resultid) select "
@@ -165,7 +166,7 @@ public class GenerateRecord {
 							+ ",schoolid,departmentid,id from tmajorscoreline where year = "
 							+ year
 							+ " and topscore between "
-							+ (double) (top + safeDown)
+							+ (double) (bottom + safeDown)
 							+ " and "
 							+ (double) (top + safeUp)
 							+ " and topscore+bottomscore between "
@@ -192,9 +193,9 @@ public class GenerateRecord {
 							+ " and bottomscore*3/4+ topscore/4 between "
 							+ (double) (bottom + normalDown)
 							+ " and "
-							+ (double) (bottom + normalUp)
+							+ (double) (top + normalUp)
 							+ " and topscore*3/4 + bottomscore/4 between "
-							+ (double) (top + normalDown)
+							+ (double) (bottom + normalDown)
 							+ " and "
 							+ (double) (top + normalUp)
 							+ " and majorid in (select majorid from tmajor where majortype = "
@@ -214,7 +215,7 @@ public class GenerateRecord {
 							+ " and bottomscore between "
 							+ (double) (bottom + riskDown)
 							+ " and "
-							+ (double) (bottom + riskUp)
+							+ (double) (top + riskUp)
 							+ " and topscore + bottomscore between "
 							+ (double) 2
 							* (top + riskDown)
@@ -225,7 +226,7 @@ public class GenerateRecord {
 							+ majortype + ");";
 					break;
 				}
-				// System.out.println(sql);
+//				System.out.println(sql);
 				stmt.executeUpdate(sql);
 				if (stmt.getUpdateCount() > 0)
 					System.out.println("insert scuess!\n " + score + ","
@@ -236,28 +237,26 @@ public class GenerateRecord {
 				int count = rs.getInt("count");
 				System.out.println("data count: " + count);
 			}
-			sql = "select * from tmajorscoreline where majorid in (select resultid from trecord where year = "
-					+ year
-					+ " and risk = "
-					+ risk
-					+ " and score = "
-					+ score
-					+ " and type = "
-					+ majortype
-					+ ") and schoolid in (select schoolid from tschool where is211 = "
-					+ is211
-					+ " and is985 = "
-					+ is985
-					+ ") and majorid in(select majorid from tmajor where majortype = "
-					+ majortype
-					+ " and majorclass = "
-					+ majorclass
-					+ " and majorenrolltype = "
-					+ majorenrolltype
-					+ " and generalcode =" + generalcode + " );";
+			// sql =
+			// "select * from tmajorscoreline where id in (select resultid from trecord where year = "
+			// + year
+			// + " and risk = "
+			// + risk
+			// + " and score = "
+			// + score
+			// + " and type = "
+			// + majortype
+			// +
+			// ") and majorid in(select majorid from tmajor where majortype = "
+			// + majortype
+			// + " and majorclass = "
+			// + majorclass
+			// + " and majorenrolltype = "
+			// + majorenrolltype
+			// + " and generalcode =" + generalcode + " );";
 			// System.out.println(sql);
-
-			ResultSet scoreLineRS = stmt.executeQuery(sql);
+			//
+			// ResultSet scoreLineRS = stmt.executeQuery(sql);
 			// List<Integer> majoridList = new ArrayList<Integer>();
 			// List<Integer> schoolidList = new ArrayList<Integer>();
 			// List<Integer> departmentidList = new ArrayList<Integer>();
@@ -277,7 +276,9 @@ public class GenerateRecord {
 			// + scoreLineRS.getInt("schoolid") + " department id: "
 			// + scoreLineRS.getInt("departmentid") + " id: "
 			// + scoreLineRS.getInt("id") + " schooling: "
-			// + scoreLineRS.getDouble("schooling"));
+			// + scoreLineRS.getDouble("schooling") + " topScore:"
+			// + scoreLineRS.getDouble("topscore") + " bottomScore:"
+			// + scoreLineRS.getDouble("bottomscore"));
 			// }
 			//
 			// System.out.println("school data :");
@@ -448,14 +449,18 @@ public class GenerateRecord {
 		// TODO Auto-generated method stub
 		GenerateRecord m = new GenerateRecord();
 		System.out.println("Recommand!");
-		for (int i = 0; i < 750; i++) {
-			m.recommand(750 - i, 0, 2011, 0, 0);
-			m.recommand(750 - i, 1, 2011, 0, 0);
-			m.recommand(750 - i, 2, 2011, 0, 0);
-			m.recommand(750 - i, 0, 2011, 1, 0);
-			m.recommand(750 - i, 1, 2011, 1, 0);
-			m.recommand(750 - i, 2, 2011, 1, 0);
-		}
+		 for (int i = 0; i < 750; i++) {
+		 m.recommand(750 - i, 0, 2011, 0, 0);
+		 m.recommand(750 - i, 1, 2011, 0, 0);
+		 m.recommand(750 - i, 2, 2011, 0, 0);
+		 m.recommand(750 - i, 0, 2011, 1, 0);
+		 m.recommand(750 - i, 1, 2011, 1, 0);
+		 m.recommand(750 - i, 2, 2011, 1, 0);
+		 }
+//		m.recommand(750, 0, 2011, 1, 9);
+//		m.recommand(750, 1, 2011, 1, 9);
+//		m.recommand(750, 2, 2011, 1, 9);
+
 		// System.out.println("Search!");
 		// m.search();
 	}
