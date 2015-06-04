@@ -10,9 +10,9 @@ public class GenerateRecord {
 		try {
 			Class.forName("com.mysql.jdbc.Driver"); // 加载MYSQL JDBC驱动程序
 			// Class.forName("org.gjt.mm.mysql.Driver");
-			System.out.println("Success loading Mysql Driver!");
+			// System.out.println("Success loading Mysql Driver!");
 		} catch (Exception e) {
-			System.out.print("Error loading Mysql Driver!");
+			// System.out.print("Error loading Mysql Driver!");
 			e.printStackTrace();
 		}
 		try {
@@ -56,10 +56,9 @@ public class GenerateRecord {
 			Connection connect = DriverManager.getConnection(
 					"jdbc:mysql://localhost:3306/recommend_test", "root", "");
 			// 连接URL为 jdbc:mysql//服务器地址/数据库名 ，后面的2个参数分别是登陆用户名和密码
-			System.out.println("Success connect Mysql server!");
+			// System.out.println("Success connect Mysql server!");
 			stmt = connect.createStatement();
-			long t1 = System.currentTimeMillis();
-
+			// long t1 = System.currentTimeMillis();
 			sql = "select count from vrecorded where year=" + year
 					+ " and risk = " + risk + " and score = " + score
 					+ " and type = " + majortype + ";";
@@ -67,7 +66,7 @@ public class GenerateRecord {
 			rs = stmt.executeQuery(sql);
 			rs.next();
 			if (!rs.first()) {
-				System.out.println("dataset is null , insert data.");
+				// System.out.println("dataset is null , insert data.");
 				sql = "select ranktop,rankbottom from tscoretorank where score="
 						+ score
 						+ " and year="
@@ -77,7 +76,7 @@ public class GenerateRecord {
 				// System.out.println(sql);
 				rs = stmt.executeQuery(sql);
 				rs.next();
-				System.out.println("score: "+score);
+				// System.out.println("score: " + score);
 				ranktop = rs.getInt("ranktop");
 				rankbottom = rs.getInt("rankbottom");
 				if (type == 0) {
@@ -87,15 +86,15 @@ public class GenerateRecord {
 					ranktop = ranktop * (opc1 / c20141);
 					rankbottom = rankbottom * (opc1 / c20141);
 				}
-				System.out.println("ranktop:" + ranktop + "\nrankbottom:"
-						+ rankbottom);
+				// System.out.println("ranktop:" + ranktop + "\nrankbottom:"
+				// + rankbottom);
 				sql = "select score from tscoretorank where year = " + year
 						+ " and type = " + majortype + " and ranktop <="
 						+ ranktop + " and rankbottom > " + ranktop + ";";
 				rs = stmt.executeQuery(sql);
 				rs.next();
 				top = rs.getDouble("score");
-				System.out.println("top score:" + top);
+				// System.out.println("top score:" + top);
 				sql = "select score from tscoretorank where year = " + year
 						+ " and type = " + majortype + " and  ranktop <"
 						+ rankbottom + 1 + " and rankbottom > " + rankbottom
@@ -104,7 +103,7 @@ public class GenerateRecord {
 				rs = stmt.executeQuery(sql);
 				rs.next();
 				bottom = rs.getDouble("score");
-				System.out.println("bottom score:" + bottom);
+				// System.out.println("bottom score:" + bottom);
 
 				if (type == 1) {
 					if (top >= 650 && top < 700) {
@@ -121,6 +120,13 @@ public class GenerateRecord {
 						normalUp = 30;
 						riskDown = -40;
 						riskUp = 40;
+					} else if (top >= 500 && top < 650) {
+						safeDown = -5;
+						safeUp = 5;
+						normalDown = -8;
+						normalUp = 8;
+						riskDown = -10;
+						riskUp = 10;
 					} else {
 						safeDown = -5;
 						safeUp = 5;
@@ -226,16 +232,17 @@ public class GenerateRecord {
 							+ majortype + ");";
 					break;
 				}
-//				System.out.println(sql);
+				// System.out.println(sql);
 				stmt.executeUpdate(sql);
 				if (stmt.getUpdateCount() > 0)
-					System.out.println("insert scuess!\n " + score + ","
+					System.out.println("insert scuess! " + "year: " + year
+							+ " score: " + score + " risk: " + risk + ","
 							+ majortype + " update count : "
 							+ stmt.getUpdateCount());
 			} else {
-				System.out.println("data set exists.");
-				int count = rs.getInt("count");
-				System.out.println("data count: " + count);
+				// System.out.println("data set exists.");
+				// int count = rs.getInt("count");
+				// System.out.println("data count: " + count);
 			}
 			// sql =
 			// "select * from tmajorscoreline where id in (select resultid from trecord where year = "
@@ -329,116 +336,8 @@ public class GenerateRecord {
 			// rs.last();
 			// System.out.println("major count: " + rs.getRow());
 
-			System.out.println("cost time :"
-					+ (System.currentTimeMillis() - t1) + "ms!");
-
-		} catch (Exception e) {
-			System.out.print("get data error!");
-			e.printStackTrace();
-		}
-	}
-
-	void search() {
-		try {
-			Class.forName("com.mysql.jdbc.Driver"); // 加载MYSQL JDBC驱动程序
-			// Class.forName("org.gjt.mm.mysql.Driver");
-			System.out.println("Success loading Mysql Driver!");
-		} catch (Exception e) {
-			System.out.print("Error loading Mysql Driver!");
-			e.printStackTrace();
-		}
-		try {
-			String sql;
-			int year = 2013;
-			int schoolID = 3;
-			int majortype = 1;
-			int majorclass = 0;
-			int majorenrolltype = 0;
-			int generalcode = 0;
-			ResultSet rs;
-			Statement stmt;
-			Connection connect = DriverManager.getConnection(
-					"jdbc:mysql://localhost:3306/db_recommand", "root", "");
-			// 连接URL为 jdbc:mysql//服务器地址/数据库名 ，后面的2个参数分别是登陆用户名和密码
-			System.out.println("Success connect Mysql server!");
-			stmt = connect.createStatement();
-			long t1 = System.currentTimeMillis();
-
-			sql = "select * from tmajorscoreline where year = "
-					+ year
-					+ " and schoolid = "
-					+ schoolID
-					+ " and majorid in(select majorid from tmajor where majortype = "
-					+ majortype + " and majorclass = " + majorclass
-					+ " and majorenrolltype = " + majorenrolltype
-					+ " and generalcode = " + generalcode + " );";
-			rs = stmt.executeQuery(sql);
-
-			List<Integer> majoridList = new ArrayList<Integer>();
-			List<Integer> schoolidList = new ArrayList<Integer>();
-			List<Integer> departmentidList = new ArrayList<Integer>();
-			int majorid, schoolid, departmentid;
-			while (rs.next()) {
-				majorid = rs.getInt("majorid");
-				departmentid = rs.getInt("departmentid");
-				schoolid = rs.getInt("schoolid");
-				if (!majoridList.contains(majorid))
-					majoridList.add(majorid);
-				if (!departmentidList.contains(departmentid))
-					departmentidList.add(departmentid);
-				if (!schoolidList.contains(schoolid))
-					schoolidList.add(schoolid);
-				// System.out.println("school id: " + rs.getInt("schoolid")
-				// + " department id: " + rs.getInt("departmentid")
-				// + " id: " + rs.getInt("id") + " schooling: "
-				// + rs.getDouble("schooling"));
-			}
-
-			System.out.println("school data :");
-			sql = "select * from tschool where schoolid in (";
-			for (int id : schoolidList) {
-				sql += id + ",";
-			}
-			sql = sql.substring(0, sql.length() - 1);
-			sql += ");";
-			System.out.println(sql);
-			rs = stmt.executeQuery(sql);
-			while (rs.next()) {
-				System.out.println("school id: " + rs.getInt("schoolid")
-						+ " name: " + rs.getString("schoolname"));
-			}
-
-			System.out.println("department data :");
-			sql = "select * from tdepartment where departmentid in (";
-			for (int id : departmentidList) {
-				sql += id + ",";
-			}
-			sql = sql.substring(0, sql.length() - 1);
-			sql += ");";
-			rs = stmt.executeQuery(sql);
-			while (rs.next()) {
-				System.out.println("school id: " + rs.getInt("schoolid")
-						+ " department id: " + rs.getInt("departmentid")
-						+ " name: " + rs.getString("departmentname"));
-			}
-
-			System.out.println("major data :");
-			sql = "select * from tmajor where majorid in (";
-			for (int id : majoridList) {
-				sql += id + ",";
-			}
-			sql = sql.substring(0, sql.length() - 1);
-			sql += ");";
-			rs = stmt.executeQuery(sql);
-			while (rs.next()) {
-				System.out.println("school id: " + rs.getInt("schoolid")
-						+ " department id: " + rs.getInt("departmentid")
-						+ " major id: " + rs.getInt("majorid") + " name: "
-						+ rs.getString("majorname"));
-			}
-
-			System.out.println("cost time :"
-					+ (System.currentTimeMillis() - t1) + "ms!");
+			// System.out.println("cost time :"
+			// + (System.currentTimeMillis() - t1) + "ms!");
 		} catch (Exception e) {
 			System.out.print("get data error!");
 			e.printStackTrace();
@@ -449,17 +348,55 @@ public class GenerateRecord {
 		// TODO Auto-generated method stub
 		GenerateRecord m = new GenerateRecord();
 		System.out.println("Recommand!");
-		 for (int i = 0; i < 750; i++) {
-		 m.recommand(750 - i, 0, 2011, 0, 0);
-		 m.recommand(750 - i, 1, 2011, 0, 0);
-		 m.recommand(750 - i, 2, 2011, 0, 0);
-		 m.recommand(750 - i, 0, 2011, 1, 0);
-		 m.recommand(750 - i, 1, 2011, 1, 0);
-		 m.recommand(750 - i, 2, 2011, 1, 0);
-		 }
-//		m.recommand(750, 0, 2011, 1, 9);
-//		m.recommand(750, 1, 2011, 1, 9);
-//		m.recommand(750, 2, 2011, 1, 9);
+
+		long t1 = System.currentTimeMillis();
+		for (int i = 0; i < 750; i++) {
+			m.recommand(750 - i, 0, 2011, 0, 0);
+			m.recommand(750 - i, 1, 2011, 0, 0);
+			m.recommand(750 - i, 2, 2011, 0, 0);
+			m.recommand(750 - i, 0, 2011, 1, 0);
+			m.recommand(750 - i, 1, 2011, 1, 0);
+			m.recommand(750 - i, 2, 2011, 1, 0);
+		}
+		System.out.println(" 2011 cost time :"
+				+ (System.currentTimeMillis() - t1) + "ms!");
+
+		t1 = System.currentTimeMillis();
+		for (int i = 0; i < 750; i++) {
+			m.recommand(750 - i, 0, 2012, 0, 0);
+			m.recommand(750 - i, 1, 2012, 0, 0);
+			m.recommand(750 - i, 2, 2012, 0, 0);
+			m.recommand(750 - i, 0, 2012, 1, 0);
+			m.recommand(750 - i, 1, 2012, 1, 0);
+			m.recommand(750 - i, 2, 2012, 1, 0);
+		}
+		System.out.println(" 2012 cost time :"
+				+ (System.currentTimeMillis() - t1) + "ms!");
+		t1 = System.currentTimeMillis();
+		for (int i = 0; i < 750; i++) {
+			m.recommand(750 - i, 0, 2013, 0, 0);
+			m.recommand(750 - i, 1, 2013, 0, 0);
+			m.recommand(750 - i, 2, 2013, 0, 0);
+			m.recommand(750 - i, 0, 2013, 1, 0);
+			m.recommand(750 - i, 1, 2013, 1, 0);
+			m.recommand(750 - i, 2, 2013, 1, 0);
+		}
+		System.out.println(" 2013 cost time :"
+				+ (System.currentTimeMillis() - t1) + "ms!");
+		t1 = System.currentTimeMillis();
+		for (int i = 0; i < 750; i++) {
+			m.recommand(750 - i, 0, 2014, 0, 0);
+			m.recommand(750 - i, 1, 2014, 0, 0);
+			m.recommand(750 - i, 2, 2014, 0, 0);
+			m.recommand(750 - i, 0, 2014, 1, 0);
+			m.recommand(750 - i, 1, 2014, 1, 0);
+			m.recommand(750 - i, 2, 2014, 1, 0);
+		}
+		System.out.println(" 2014 cost time :"
+				+ (System.currentTimeMillis() - t1) + "ms!");
+		// m.recommand(750, 0, 2011, 1, 9);
+		// m.recommand(750, 1, 2011, 1, 9);
+		// m.recommand(750, 2, 2011, 1, 9);
 
 		// System.out.println("Search!");
 		// m.search();
