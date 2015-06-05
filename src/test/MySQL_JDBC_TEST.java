@@ -6,63 +6,6 @@ import java.util.List;
 
 public class MySQL_JDBC_TEST {
 
-	class majorscoreline {
-		int id;
-		int schooIDd;
-		int departmentiD;
-		int majoriD;
-		double schooling;
-		int enrollPlan;
-		int actuallyEnrool;
-		double topScore;
-		double bottomScore;
-		int firstCount;
-		double firstTopScore;
-		double firstBottomScore;
-		int parallenlCount;
-		double parallelTopScore;
-		double parallelBottomScore;
-		int additionalCount;
-		double additionalTopScore;
-		double additionalBottomScore;
-		int year;
-		int generalCode;
-		int majorName;
-		int majorCode;
-		int majorRate;
-		int iskeyMajor;
-		int majorRank;
-		int majorType;
-		int majorClass;
-		int majorEnrolType;
-		int majorEnroll;
-		String majorInfo;
-	}
-
-	class school {
-		int schoolid;
-		int localityP;
-		int localityC;
-		String schoolName;
-		String address;
-		String website;
-		int schoolType;
-		String schoolInfo;
-		boolean isBase;
-		int schoolHasKeyMajor;
-		boolean isMinistry;
-		boolean is211;
-		boolean is985;
-		boolean hasGraduate;
-		boolean isProvincial;
-		String schoolCode;
-		int schoolRank;
-		double schoolRRate;
-		String keyMajorDetail;
-		int schoolRnroll;
-		String filed1;
-		String filed2;
-	}
 
 	void recommand(int score, int risk, int year) {
 		try {
@@ -91,7 +34,7 @@ public class MySQL_JDBC_TEST {
 			int ranktop, rankbottom;
 			double top, bottom;
 			Connection connect = DriverManager.getConnection(
-					"jdbc:mysql://localhost:3306/db_recommand", "root", "");
+					"jdbc:mysql://localhost:3306/recommend_test", "root", "");
 			// 连接URL为 jdbc:mysql//服务器地址/数据库名 ，后面的2个参数分别是登陆用户名和密码
 			System.out.println("Success connect Mysql server!");
 			stmt = connect.createStatement();
@@ -426,7 +369,7 @@ public class MySQL_JDBC_TEST {
 		// TODO Auto-generated method stub
 		MySQL_JDBC_TEST m = new MySQL_JDBC_TEST();
 		System.out.println("Recommand!");
-		m.recommand(610, 1, 2013);
+		m.recommand(610, 1, 2011);
 		// System.out.println("Search!");
 		// m.search();
 	}

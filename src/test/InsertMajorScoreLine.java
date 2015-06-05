@@ -66,7 +66,7 @@ public class InsertMajorScoreLine {
 		try {
 			sql = "insert into tschool(schoolname) values('" + schoolName
 					+ "');";
-			System.out.println(sql);
+//			System.out.println(sql);
 			stmt.executeUpdate(sql, Statement.RETURN_GENERATED_KEYS);
 			ResultSet rs1 = stmt.getGeneratedKeys();
 			if (rs1.next()) {
@@ -118,7 +118,7 @@ public class InsertMajorScoreLine {
 					+ majorName
 					+ "',"
 					+ majorType + "," + majorEnrollType + ");";
-			System.out.println(sql);
+//			System.out.println(sql);
 			stmt.executeUpdate(sql, Statement.RETURN_GENERATED_KEYS);
 			ResultSet rs1 = stmt.getGeneratedKeys();
 			if (rs1.next()) {
@@ -152,7 +152,7 @@ public class InsertMajorScoreLine {
 						+ fTopScore + "," + fBottomScore + ",0," + pTopScore
 						+ "," + pBottomScore + ",0," + aTopScore + ","
 						+ aBottomScore + "," + enrollType + ");";
-				System.out.println(sql);
+//				System.out.println(sql);
 				stmt.executeUpdate(sql);
 			}
 		} catch (SQLException e) {
@@ -175,7 +175,10 @@ public class InsertMajorScoreLine {
 				reader = new FileReader(filePath);
 				BufferedReader bufferedReader = new BufferedReader(reader);
 				String line = null;
+				int ccc=0;
 				while ((line = bufferedReader.readLine()) != null) {
+					ccc++;
+//					System.out.println(ccc);
 					year = Integer.parseInt(line.split("\t")[0]);
 					schoolName = line.split("\t")[1];
 					schoolID = getSchoolID(schoolName);
@@ -217,7 +220,13 @@ public class InsertMajorScoreLine {
 	}
 
 	public static void main(String[] args) {
-		InsertMajorScoreLine i = new InsertMajorScoreLine("major.txt");
+		InsertMajorScoreLine i = new InsertMajorScoreLine("2011major.txt");
+		i.processMajor();
+		i = new InsertMajorScoreLine("2012major.txt");
+		i.processMajor();
+		i = new InsertMajorScoreLine("2013major.txt");
+		i.processMajor();
+		i = new InsertMajorScoreLine("2014major.txt");
 		i.processMajor();
 	}
 

@@ -27,8 +27,8 @@ public class NewMajorAndSchool {
 		String sql;
 		int schoolID = -1;
 		try {
-			sql = "select count(1),schoolid from tschool where schoolname =\""
-					+ schoolName + "\";";
+			sql = "select  count(1),schoolid from tschool where schoolname = '"
+					+ schoolName + "' or usedName like '%" + schoolName + "%';";
 			// System.out.println(sql);
 			ResultSet rs = stmt.executeQuery(sql);
 			rs.next();

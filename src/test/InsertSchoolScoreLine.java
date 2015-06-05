@@ -64,7 +64,8 @@ public class InsertSchoolScoreLine {
 	public int insertSchool(String schoolName) {
 		String sql;
 		try {
-			sql = "insert into tschool(schoolname) values('" + schoolName + "');";
+			sql = "insert into tschool(schoolname) values('" + schoolName
+					+ "');";
 			// System.out.println(sql);
 			stmt.executeUpdate(sql, Statement.RETURN_GENERATED_KEYS);
 			ResultSet rs1 = stmt.getGeneratedKeys();
@@ -101,7 +102,6 @@ public class InsertSchoolScoreLine {
 
 	}
 
-
 	void processSchool() {
 		long t1 = System.currentTimeMillis();
 
@@ -122,9 +122,11 @@ public class InsertSchoolScoreLine {
 					pc = line.split("\t")[2];
 					for (int i = 0; i < this.pc.length; i++)
 						if (this.pc[i].equals(pc)) {
-							enrollType = i+1;
+							enrollType = i + 1;
 							break;
 						}
+					if (enrollType == 7 || enrollType == 8)
+						enrollType = 6;
 					lx = line.split("\t")[3];
 					if (!lx.startsWith("ÎÄÊ·"))
 						type = 1;
@@ -162,7 +164,14 @@ public class InsertSchoolScoreLine {
 	}
 
 	public static void main(String[] args) {
-		InsertSchoolScoreLine i = new InsertSchoolScoreLine("schoolScore2011.txt");
+		InsertSchoolScoreLine i = new InsertSchoolScoreLine(
+				"2011school.txt");
+		i.processSchool();
+		i = new InsertSchoolScoreLine("2012school.txt");
+		i.processSchool();
+		i = new InsertSchoolScoreLine("2013school.txt");
+		i.processSchool();
+		i = new InsertSchoolScoreLine("2014school.txt");
 		i.processSchool();
 	}
 

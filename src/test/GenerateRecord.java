@@ -6,7 +6,7 @@ import java.util.List;
 
 public class GenerateRecord {
 
-	void recommand(int score, int risk, int year, int type, int enrollType) {
+	void recommand(int score, int risk, int year, int type) {
 		try {
 			Class.forName("com.mysql.jdbc.Driver"); // 加载MYSQL JDBC驱动程序
 			// Class.forName("org.gjt.mm.mysql.Driver");
@@ -21,7 +21,6 @@ public class GenerateRecord {
 			int localityc = 0;
 			int majortype = type;
 			int majorclass = 0;
-			int majorenrolltype = enrollType;
 			int is211 = 0;
 			int is985 = 0;
 			int generalcode = 0;
@@ -36,23 +35,39 @@ public class GenerateRecord {
 			int c20131 = 97106;
 			int c20140 = 39349;
 			int c20141 = 94320;
+			int c10 = c20140;
+			int c11 = c20141;
+			int c20 = c20140 + c20130;
+			int c21 = c20141 + c20131;
+			int c30 = c20140 + c20130 + c20120;
+			int c31 = c20141 + c20131 + c20121;
+			int c40 = c20140 + c20130 + c20120 + c20110;
+			int c41 = c20141 + c20131 + c20121 + c20111;
 			int opc0 = 0, opc1 = 0;
-			if (year == 2011) {
+			switch (year) {
+			case 2011:
 				opc0 = c20110;
 				opc1 = c20111;
-			}
-			if (year == 2012) {
+				break;
+			case 2012:
 				opc0 = c20120;
 				opc1 = c20121;
-			}
-			if (year == 2013) {
+				break;
+			case 2013:
 				opc0 = c20130;
 				opc1 = c20131;
+				break;
+			case 2014:
+				opc0 = c20140;
+				opc1 = c20141;
+				break;
 			}
+
 			ResultSet rs;
 			Statement stmt;
 			int ranktop, rankbottom;
 			double top, bottom;
+			int lastYear = 2014;
 			Connection connect = DriverManager.getConnection(
 					"jdbc:mysql://localhost:3306/recommend_test", "root", "");
 			// 连接URL为 jdbc:mysql//服务器地址/数据库名 ，后面的2个参数分别是登陆用户名和密码
@@ -70,7 +85,7 @@ public class GenerateRecord {
 				sql = "select ranktop,rankbottom from tscoretorank where score="
 						+ score
 						+ " and year="
-						+ year
+						+ lastYear
 						+ " and type="
 						+ majortype + ";";
 				// System.out.println(sql);
@@ -79,32 +94,255 @@ public class GenerateRecord {
 				// System.out.println("score: " + score);
 				ranktop = rs.getInt("ranktop");
 				rankbottom = rs.getInt("rankbottom");
-				if (type == 0) {
-					ranktop = ranktop * (opc0 / c20140);
-					rankbottom = rankbottom * (opc0 / c20140);
-				} else {
-					ranktop = ranktop * (opc1 / c20141);
-					rankbottom = rankbottom * (opc1 / c20141);
-				}
 				// System.out.println("ranktop:" + ranktop + "\nrankbottom:"
 				// + rankbottom);
-				sql = "select score from tscoretorank where year = " + year
-						+ " and type = " + majortype + " and ranktop <="
-						+ ranktop + " and rankbottom > " + ranktop + ";";
-				rs = stmt.executeQuery(sql);
-				rs.next();
-				top = rs.getDouble("score");
-				// System.out.println("top score:" + top);
-				sql = "select score from tscoretorank where year = " + year
-						+ " and type = " + majortype + " and  ranktop <"
-						+ rankbottom + 1 + " and rankbottom > " + rankbottom
-						+ ";";
-				// System.out.println(sql);
-				rs = stmt.executeQuery(sql);
-				rs.next();
-				bottom = rs.getDouble("score");
-				// System.out.println("bottom score:" + bottom);
+				// 获取排名对应分数
+				if (year > 1999) {
+					if (type == 0) {
+						ranktop = ranktop * (opc0 / c20140);
+						rankbottom = rankbottom * (opc0 / c20140);
+					} else {
+						ranktop = ranktop * (opc1 / c20141);
+						rankbottom = rankbottom * (opc1 / c20141);
+					}
+					sql = "select score from tscoretorank where year = " + year
+							+ " and type = " + majortype + " and ranktop <="
+							+ ranktop + " and rankbottom > " + ranktop + ";";
+					rs = stmt.executeQuery(sql);
+					rs.next();
+					top = rs.getDouble("score");
+					// System.out.println("top score:" + top);
+					sql = "select score from tscoretorank where year = " + year
+							+ " and type = " + majortype + " and  ranktop <"
+							+ rankbottom + 1 + " and rankbottom > "
+							+ rankbottom + ";";
+					// System.out.println(sql);
+					rs = stmt.executeQuery(sql);
+					rs.next();
+					bottom = rs.getDouble("score");
+					// System.out.println("bottom score:" + bottom);
+				} else {
+					double tops = 0, bottoms = 0;
+					int rankt = ranktop;
+					int rankb = rankbottom;
+					switch (year) {
+					default:
+					case 1:
+						if (type == 0) {
+							ranktop = ranktop * (c20140 / c20140);
+							rankbottom = rankbottom * (c20140 / c20140);
+						} else {
+							ranktop = ranktop * (c20141 / c20141);
+							rankbottom = rankbottom * (c20141 / c20141);
+						}
+						sql = "select score from tscoretorank where year = "
+								+ lastYear + " and type = " + majortype
+								+ " and ranktop <=" + ranktop
+								+ " and rankbottom > " + ranktop + ";";
+						rs = stmt.executeQuery(sql);
+						rs.next();
+						top = rs.getDouble("score");
+						// System.out.println("top score:" + top);
+						sql = "select score from tscoretorank where year = "
+								+ lastYear + " and type = " + majortype
+								+ " and  ranktop <" + rankbottom + 1
+								+ " and rankbottom > " + rankbottom + ";";
+						// System.out.println(sql);
+						rs = stmt.executeQuery(sql);
+						rs.next();
+						bottom = rs.getDouble("score");
+						// System.out.println("bottom score:" + bottom);
+						break;
+					case 2:
+						sql = "select score from tscoretorank where year = "
+								+ lastYear + " and type = " + majortype
+								+ " and ranktop <=" + ranktop
+								+ " and rankbottom > " + ranktop + ";";
+						rs = stmt.executeQuery(sql);
+						rs.next();
+						tops += rs.getDouble("score");
+						sql = "select score from tscoretorank where year = "
+								+ lastYear + " and type = " + majortype
+								+ " and  ranktop <" + rankbottom + 1
+								+ " and rankbottom > " + rankbottom + ";";
+						rs = stmt.executeQuery(sql);
+						rs.next();
+						bottoms += rs.getDouble("score");
 
+						if (type == 0) {
+							ranktop = ranktop * (c20130 / c20140);
+							rankbottom = rankbottom * (c20130 / c20140);
+						} else {
+							ranktop = ranktop * (c20131 / c20141);
+							rankbottom = rankbottom * (c20131 / c20141);
+						}
+						sql = "select score from tscoretorank where year = "
+								+ (lastYear - 1) + " and type = " + majortype
+								+ " and ranktop <=" + ranktop
+								+ " and rankbottom > " + ranktop + ";";
+						rs = stmt.executeQuery(sql);
+						rs.next();
+						tops += rs.getDouble("score");
+						sql = "select score from tscoretorank where year = "
+								+ (lastYear - 1) + " and type = " + majortype
+								+ " and  ranktop <" + rankbottom + 1
+								+ " and rankbottom > " + rankbottom + ";";
+						rs = stmt.executeQuery(sql);
+						rs.next();
+						bottoms += rs.getDouble("score");
+
+						top = tops / 2;
+						bottom = bottoms / 2;
+						break;
+					case 3:
+						sql = "select score from tscoretorank where year = "
+								+ lastYear + " and type = " + majortype
+								+ " and ranktop <=" + ranktop
+								+ " and rankbottom > " + ranktop + ";";
+						rs = stmt.executeQuery(sql);
+						rs.next();
+						tops += rs.getDouble("score");
+						sql = "select score from tscoretorank where year = "
+								+ lastYear + " and type = " + majortype
+								+ " and  ranktop <" + rankbottom + 1
+								+ " and rankbottom > " + rankbottom + ";";
+						rs = stmt.executeQuery(sql);
+						rs.next();
+						bottoms += rs.getDouble("score");
+
+						if (type == 0) {
+							ranktop = ranktop * (c20130 / c20140);
+							rankbottom = rankbottom * (c20130 / c20140);
+						} else {
+							ranktop = ranktop * (c20131 / c20141);
+							rankbottom = rankbottom * (c20131 / c20141);
+						}
+						sql = "select score from tscoretorank where year = "
+								+ (lastYear - 1) + " and type = " + majortype
+								+ " and ranktop <=" + ranktop
+								+ " and rankbottom > " + ranktop + ";";
+						rs = stmt.executeQuery(sql);
+						rs.next();
+						tops += rs.getDouble("score");
+						sql = "select score from tscoretorank where year = "
+								+ (lastYear - 1) + " and type = " + majortype
+								+ " and  ranktop <" + rankbottom + 1
+								+ " and rankbottom > " + rankbottom + ";";
+						rs = stmt.executeQuery(sql);
+						rs.next();
+						bottoms += rs.getDouble("score");
+
+						if (type == 0) {
+							ranktop = ranktop * (c20120 / c20140);
+							rankbottom = rankbottom * (c20120 / c20140);
+						} else {
+							ranktop = ranktop * (c20121 / c20141);
+							rankbottom = rankbottom * (c20121 / c20141);
+						}
+						sql = "select score from tscoretorank where year = "
+								+ (lastYear - 2) + " and type = " + majortype
+								+ " and ranktop <=" + ranktop
+								+ " and rankbottom > " + ranktop + ";";
+						rs = stmt.executeQuery(sql);
+						rs.next();
+						tops += rs.getDouble("score");
+						sql = "select score from tscoretorank where year = "
+								+ (lastYear - 2) + " and type = " + majortype
+								+ " and  ranktop <" + rankbottom + 1
+								+ " and rankbottom > " + rankbottom + ";";
+						rs = stmt.executeQuery(sql);
+						rs.next();
+						bottoms += rs.getDouble("score");
+
+						top = tops / 3;
+						bottom = bottoms / 3;
+						break;
+					case 4:
+						sql = "select score from tscoretorank where year = "
+								+ lastYear + " and type = " + majortype
+								+ " and ranktop <=" + ranktop
+								+ " and rankbottom > " + ranktop + ";";
+						rs = stmt.executeQuery(sql);
+						rs.next();
+						tops += rs.getDouble("score");
+						sql = "select score from tscoretorank where year = "
+								+ lastYear + " and type = " + majortype
+								+ " and  ranktop <" + rankbottom + 1
+								+ " and rankbottom > " + rankbottom + ";";
+						rs = stmt.executeQuery(sql);
+						rs.next();
+						bottoms += rs.getDouble("score");
+
+						if (type == 0) {
+							ranktop = ranktop * (c20130 / c20140);
+							rankbottom = rankbottom * (c20130 / c20140);
+						} else {
+							ranktop = ranktop * (c20131 / c20141);
+							rankbottom = rankbottom * (c20131 / c20141);
+						}
+						sql = "select score from tscoretorank where year = "
+								+ (lastYear - 1) + " and type = " + majortype
+								+ " and ranktop <=" + ranktop
+								+ " and rankbottom > " + ranktop + ";";
+						rs = stmt.executeQuery(sql);
+						rs.next();
+						tops += rs.getDouble("score");
+						sql = "select score from tscoretorank where year = "
+								+ (lastYear - 1) + " and type = " + majortype
+								+ " and  ranktop <" + rankbottom + 1
+								+ " and rankbottom > " + rankbottom + ";";
+						rs = stmt.executeQuery(sql);
+						rs.next();
+						bottoms += rs.getDouble("score");
+
+						if (type == 0) {
+							ranktop = ranktop * (c20120 / c20140);
+							rankbottom = rankbottom * (c20120 / c20140);
+						} else {
+							ranktop = ranktop * (c20121 / c20141);
+							rankbottom = rankbottom * (c20121 / c20141);
+						}
+						sql = "select score from tscoretorank where year = "
+								+ (lastYear - 2) + " and type = " + majortype
+								+ " and ranktop <=" + ranktop
+								+ " and rankbottom > " + ranktop + ";";
+						rs = stmt.executeQuery(sql);
+						rs.next();
+						tops += rs.getDouble("score");
+						sql = "select score from tscoretorank where year = "
+								+ (lastYear - 2) + " and type = " + majortype
+								+ " and  ranktop <" + rankbottom + 1
+								+ " and rankbottom > " + rankbottom + ";";
+						rs = stmt.executeQuery(sql);
+						rs.next();
+						bottoms += rs.getDouble("score");
+
+						if (type == 0) {
+							ranktop = ranktop * (c20110 / c20140);
+							rankbottom = rankbottom * (c20110 / c20140);
+						} else {
+							ranktop = ranktop * (c20111 / c20141);
+							rankbottom = rankbottom * (c20111 / c20141);
+						}
+						sql = "select score from tscoretorank where year = "
+								+ (lastYear - 3) + " and type = " + majortype
+								+ " and ranktop <=" + ranktop
+								+ " and rankbottom > " + ranktop + ";";
+						rs = stmt.executeQuery(sql);
+						rs.next();
+						tops += rs.getDouble("score");
+						sql = "select score from tscoretorank where year = "
+								+ (lastYear - 3) + " and type = " + majortype
+								+ " and  ranktop <" + rankbottom + 1
+								+ " and rankbottom > " + rankbottom + ";";
+						rs = stmt.executeQuery(sql);
+						rs.next();
+						bottoms += rs.getDouble("score");
+						top = tops / 4;
+						bottom = bottoms / 4;
+						break;
+					}
+				}
 				if (type == 1) {
 					if (top >= 650 && top < 700) {
 						safeDown = -10;
@@ -161,7 +399,9 @@ public class GenerateRecord {
 				}
 				switch (risk) {
 				case 0:
-					sql = "insert into trecord(year,risk,score,type,schoolid,departmentid,resultid) select "
+					sql = "insert into trecord"
+							+ year
+							+ "(year,risk,score,type,schoolid,departmentid,resultid) select "
 							+ year
 							+ ","
 							+ risk
@@ -176,17 +416,17 @@ public class GenerateRecord {
 							+ " and "
 							+ (double) (top + safeUp)
 							+ " and topscore+bottomscore between "
-							+ (double) 2
-							* (bottom + safeDown)
+							+ (double) 2 * (bottom + safeDown)
 							+ " and "
-							+ (double) 2
-							* (bottom + safeUp)
+							+ (double) 2 * (bottom + safeUp)
 							+ " and majorid in (select majorid from tmajor where majortype = "
-							+ majortype + ");";
+							+ majortype + " and majorid<18814);";
 					break;
 				default:
 				case 1:
-					sql = "insert into trecord(year,risk,score,type,schoolid,departmentid,resultid) select "
+					sql = "insert into trecord"
+							+ year
+							+ "(year,risk,score,type,schoolid,departmentid,resultid) select "
 							+ year
 							+ ","
 							+ risk
@@ -205,10 +445,12 @@ public class GenerateRecord {
 							+ " and "
 							+ (double) (top + normalUp)
 							+ " and majorid in (select majorid from tmajor where majortype = "
-							+ majortype + ");";
+							+ majortype + " and majorid<18814);";
 					break;
 				case 2:
-					sql = "insert into trecord(year,risk,score,type,schoolid,departmentid,resultid) select "
+					sql = "insert into trecord"
+							+ year
+							+ "(year,risk,score,type,schoolid,departmentid,resultid) select "
 							+ year
 							+ ","
 							+ risk
@@ -223,13 +465,11 @@ public class GenerateRecord {
 							+ " and "
 							+ (double) (top + riskUp)
 							+ " and topscore + bottomscore between "
-							+ (double) 2
-							* (top + riskDown)
+							+ (double) 2 * (top + riskDown)
 							+ " and "
-							+ (double) 2
-							* (top + riskUp)
+							+ (double) 2 * (top + riskUp)
 							+ " and majorid in (select majorid from tmajor where majortype = "
-							+ majortype + ");";
+							+ majortype + " and majorid<18814);";
 					break;
 				}
 				// System.out.println(sql);
@@ -349,50 +589,87 @@ public class GenerateRecord {
 		GenerateRecord m = new GenerateRecord();
 		System.out.println("Recommand!");
 
+		// m.recommand(750, 2, 2011, 0);
+
 		long t1 = System.currentTimeMillis();
+		 for (int i = 0; i < 750; i++) {
+		 m.recommand(750 - i, 0, 2011, 0);
+		 m.recommand(750 - i, 1, 2011, 0);
+		 m.recommand(750 - i, 2, 2011, 0);
+		 m.recommand(750 - i, 0, 2011, 1);
+		 m.recommand(750 - i, 1, 2011, 1);
+		 m.recommand(750 - i, 2, 2011, 1);
+		 }
+		 System.out.println(" 2011 cost time :"
+		 + (System.currentTimeMillis() - t1) + "ms!");
+		
+		 t1 = System.currentTimeMillis();
+		 for (int i = 0; i < 750; i++) {
+		 m.recommand(750 - i, 0, 2012, 0);
+		 m.recommand(750 - i, 1, 2012, 0);
+		 m.recommand(750 - i, 2, 2012, 0);
+		 m.recommand(750 - i, 0, 2012, 1);
+		 m.recommand(750 - i, 1, 2012, 1);
+		 m.recommand(750 - i, 2, 2012, 1);
+		 }
+		 System.out.println(" 2012 cost time :"
+		 + (System.currentTimeMillis() - t1) + "ms!");
+		 t1 = System.currentTimeMillis();
+		 for (int i = 0; i < 750; i++) {
+		 m.recommand(750 - i, 0, 2013, 0);
+		 m.recommand(750 - i, 1, 2013, 0);
+		 m.recommand(750 - i, 2, 2013, 0);
+		 m.recommand(750 - i, 0, 2013, 1);
+		 m.recommand(750 - i, 1, 2013, 1);
+		 m.recommand(750 - i, 2, 2013, 1);
+		 }
+		 System.out.println(" 2013 cost time :"
+		 + (System.currentTimeMillis() - t1) + "ms!");
+		 t1 = System.currentTimeMillis();
+		 for (int i = 0; i < 750; i++) {
+		 m.recommand(750 - i, 0, 2014, 0);
+		 m.recommand(750 - i, 1, 2014, 0);
+		 m.recommand(750 - i, 2, 2014, 0);
+		 m.recommand(750 - i, 0, 2014, 1);
+		 m.recommand(750 - i, 1, 2014, 1);
+		 m.recommand(750 - i, 2, 2014, 1);
+		 }
+		 System.out.println(" 2014 cost time :"
+		 + (System.currentTimeMillis() - t1) + "ms!");
+
+		t1 = System.currentTimeMillis();
 		for (int i = 0; i < 750; i++) {
-			m.recommand(750 - i, 0, 2011, 0, 0);
-			m.recommand(750 - i, 1, 2011, 0, 0);
-			m.recommand(750 - i, 2, 2011, 0, 0);
-			m.recommand(750 - i, 0, 2011, 1, 0);
-			m.recommand(750 - i, 1, 2011, 1, 0);
-			m.recommand(750 - i, 2, 2011, 1, 0);
+			m.recommand(750 - i, 0, 2, 0);
+			m.recommand(750 - i, 1, 2, 0);
+			m.recommand(750 - i, 2, 2, 0);
+			m.recommand(750 - i, 0, 2, 1);
+			m.recommand(750 - i, 1, 2, 1);
+			m.recommand(750 - i, 2, 2, 1);
 		}
-		System.out.println(" 2011 cost time :"
+		System.out.println(" last 2 cost time :"
 				+ (System.currentTimeMillis() - t1) + "ms!");
 
 		t1 = System.currentTimeMillis();
 		for (int i = 0; i < 750; i++) {
-			m.recommand(750 - i, 0, 2012, 0, 0);
-			m.recommand(750 - i, 1, 2012, 0, 0);
-			m.recommand(750 - i, 2, 2012, 0, 0);
-			m.recommand(750 - i, 0, 2012, 1, 0);
-			m.recommand(750 - i, 1, 2012, 1, 0);
-			m.recommand(750 - i, 2, 2012, 1, 0);
+			m.recommand(750 - i, 0, 3, 0);
+			m.recommand(750 - i, 1, 3, 0);
+			m.recommand(750 - i, 2, 3, 0);
+			m.recommand(750 - i, 0, 3, 1);
+			m.recommand(750 - i, 1, 3, 1);
+			m.recommand(750 - i, 2, 3, 1);
 		}
-		System.out.println(" 2012 cost time :"
+		System.out.println(" last 3 cost time :"
 				+ (System.currentTimeMillis() - t1) + "ms!");
 		t1 = System.currentTimeMillis();
 		for (int i = 0; i < 750; i++) {
-			m.recommand(750 - i, 0, 2013, 0, 0);
-			m.recommand(750 - i, 1, 2013, 0, 0);
-			m.recommand(750 - i, 2, 2013, 0, 0);
-			m.recommand(750 - i, 0, 2013, 1, 0);
-			m.recommand(750 - i, 1, 2013, 1, 0);
-			m.recommand(750 - i, 2, 2013, 1, 0);
+			m.recommand(750 - i, 0, 4, 0);
+			m.recommand(750 - i, 1, 4, 0);
+			m.recommand(750 - i, 2, 4, 0);
+			m.recommand(750 - i, 0, 4, 1);
+			m.recommand(750 - i, 1, 4, 1);
+			m.recommand(750 - i, 2, 4, 1);
 		}
-		System.out.println(" 2013 cost time :"
-				+ (System.currentTimeMillis() - t1) + "ms!");
-		t1 = System.currentTimeMillis();
-		for (int i = 0; i < 750; i++) {
-			m.recommand(750 - i, 0, 2014, 0, 0);
-			m.recommand(750 - i, 1, 2014, 0, 0);
-			m.recommand(750 - i, 2, 2014, 0, 0);
-			m.recommand(750 - i, 0, 2014, 1, 0);
-			m.recommand(750 - i, 1, 2014, 1, 0);
-			m.recommand(750 - i, 2, 2014, 1, 0);
-		}
-		System.out.println(" 2014 cost time :"
+		System.out.println(" last 4 cost time :"
 				+ (System.currentTimeMillis() - t1) + "ms!");
 		// m.recommand(750, 0, 2011, 1, 9);
 		// m.recommand(750, 1, 2011, 1, 9);
